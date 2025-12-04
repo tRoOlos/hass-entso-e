@@ -288,7 +288,7 @@ class EntsoeSensor(CoordinatorEntity, RestoreSensor):
                 and self.coordinator.data is not None
             ):
                 current_price = self.coordinator.get_current_price()
-                avg_price = self.coordinator.get_avg_price()
+                avg_price = self.coordinator.get_avg_price_today()
                 self._attr_extra_state_attributes = {
                     "current_percentage": round((current_price / avg_price) * 100, 1) if avg_price and avg_price > 0 else None,
                     "price_levels_today": self.coordinator.get_price_levels_today(),

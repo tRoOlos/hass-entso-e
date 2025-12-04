@@ -332,6 +332,20 @@ class EntsoeCoordinator(DataUpdateCoordinator):
             5,
         )
 
+    # ANALYSIS: Get avg price for today only
+    def get_avg_price_today(self):
+        prices_today = self.get_data_today()
+        if not prices_today or len(prices_today) == 0:
+            return None
+        return round(sum(prices_today.values()) / len(prices_today.values()), 5)
+
+    # ANALYSIS: Get avg price for tomorrow only
+    def get_avg_price_tomorrow(self):
+        prices_tomorrow = self.get_data_tomorrow()
+        if not prices_tomorrow or len(prices_tomorrow) == 0:
+            return None
+        return round(sum(prices_tomorrow.values()) / len(prices_tomorrow.values()), 5)
+
     # ANALYSIS: Get percentage of current price relative to maximum of filtered period
     def get_percentage_of_max(self):
         return round(self.get_current_price() / self.get_max_price() * 100, 1)
@@ -343,10 +357,10 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         current = self.get_current_price() - min
         return round(current / spread * 100, 1)
 
-    # ANALYSIS: Get current price level based on percentage of daily average
+    # ANALYSIS: Get current price level based on percentage of today's average
     def get_price_level(self):
         current_price = self.get_current_price()
-        avg_price = self.get_avg_price()
+        avg_price = self.get_avg_price_today()
 
         if avg_price is None or avg_price <= 0 or current_price is None:
             return None
@@ -357,7 +371,7 @@ class EntsoeCoordinator(DataUpdateCoordinator):
     # ANALYSIS: Calculate price levels for all prices today
     def get_price_levels_today(self):
         prices_today = self.get_prices_today()
-        avg_price = self.get_avg_price()
+        avg_price = self.get_avg_price_today()
 
         if not prices_today or avg_price is None or avg_price <= 0:
             return []
@@ -379,7 +393,7 @@ class EntsoeCoordinator(DataUpdateCoordinator):
     # ANALYSIS: Calculate price levels for all prices tomorrow
     def get_price_levels_tomorrow(self):
         prices_tomorrow = self.get_prices_tomorrow()
-        avg_price = self.get_avg_price()
+        avg_price = self.get_avg_price_tomorrow()
 
         if not prices_tomorrow or avg_price is None or avg_price <= 0:
             return []
