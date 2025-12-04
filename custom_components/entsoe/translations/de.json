@@ -74,11 +74,11 @@
       "price_level": {
         "name": "Aktuelles Preisniveau",
         "state": {
-          "zeer_goedkoop": "Sehr Günstig",
-          "goedkoop": "Günstig",
-          "normaal": "Normal",
-          "duur": "Teuer",
-          "zeer_duur": "Sehr Teuer"
+          "very_cheap": "Sehr Günstig",
+          "cheap": "Günstig",
+          "normal": "Normal",
+          "expensive": "Teuer",
+          "very_expensive": "Sehr Teuer"
         }
       }
     }

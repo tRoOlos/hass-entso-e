@@ -199,6 +199,10 @@ class EntsoeSensor(CoordinatorEntity, RestoreSensor):
         else:
             self._attr_suggested_display_precision = 2
 
+        # Remove attribution for price_level sensor (calculated value, not direct ENTSO-e data)
+        if description.key == "price_level":
+            self._attr_attribution = None
+
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={

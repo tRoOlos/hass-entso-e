@@ -74,11 +74,11 @@
       "price_level": {
         "name": "Huidig prijsniveau",
         "state": {
-          "zeer_goedkoop": "Zeer Goedkoop",
-          "goedkoop": "Goedkoop",
-          "normaal": "Normaal",
-          "duur": "Duur",
-          "zeer_duur": "Zeer Duur"
+          "very_cheap": "Zeer Goedkoop",
+          "cheap": "Goedkoop",
+          "normal": "Normaal",
+          "expensive": "Duur",
+          "very_expensive": "Zeer Duur"
         }
       }
     }

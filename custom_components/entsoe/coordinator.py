@@ -333,14 +333,33 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         )
 
     # ANALYSIS: Get avg price for today only
+    # This function calculates the average price for today's data only,
+    # used for per-day price level calculations to provide more accurate
+    # classifications for device automation purposes.
     def get_avg_price_today(self):
+        """Calculate average price for today only.
+
+        Returns the average of all available prices for today.
+        Returns None if no data is available for today.
+        Used for price level calculations to compare today's prices
+        against today's average independently from tomorrow's prices.
+        """
         prices_today = self.get_data_today()
         if not prices_today or len(prices_today) == 0:
             return None
         return round(sum(prices_today.values()) / len(prices_today.values()), 5)
 
     # ANALYSIS: Get avg price for tomorrow only
+    # This function calculates the average price for tomorrow's data only,
+    # used for per-day price level calculations.
     def get_avg_price_tomorrow(self):
+        """Calculate average price for tomorrow only.
+
+        Returns the average of all available prices for tomorrow.
+        Returns None if no data is available for tomorrow.
+        Used for price level calculations to compare tomorrow's prices
+        against tomorrow's average independently from today's prices.
+        """
         prices_tomorrow = self.get_data_tomorrow()
         if not prices_tomorrow or len(prices_tomorrow) == 0:
             return None
@@ -358,7 +377,21 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         return round(current / spread * 100, 1)
 
     # ANALYSIS: Get current price level based on percentage of today's average
+    # Changed to use today's average only (instead of 48-hour average) for more
+    # accurate "expensive/cheap" classifications for device automation.
     def get_price_level(self):
+        """Get the current price level classification.
+
+        Compares the current price against today's average to classify it as:
+        - very_cheap: ≤ 60% of average
+        - cheap: > 60% and ≤ 90% of average
+        - normal: > 90% and < 115% of average
+        - expensive: ≥ 115% and < 140% of average
+        - very_expensive: ≥ 140% of average
+
+        Returns English state values that are translated via translation files.
+        Returns None if required data is not available.
+        """
         current_price = self.get_current_price()
         avg_price = self.get_avg_price_today()
 
@@ -369,7 +402,19 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         return self._calculate_level(percentage)
 
     # ANALYSIS: Calculate price levels for all prices today
+    # Changed to use today's average only for per-hour classification.
     def get_price_levels_today(self):
+        """Calculate price level classifications for all hours today.
+
+        Returns a list of dictionaries containing:
+        - time: timestamp of the hour
+        - price: the price for that hour
+        - percentage: percentage relative to today's average
+        - level: classification (very_cheap/cheap/normal/expensive/very_expensive)
+
+        Each hour is compared against today's average independently.
+        Returns empty list if data is not available.
+        """
         prices_today = self.get_prices_today()
         avg_price = self.get_avg_price_today()
 
@@ -391,7 +436,19 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         return levels
 
     # ANALYSIS: Calculate price levels for all prices tomorrow
+    # Changed to use tomorrow's average only for per-hour classification.
     def get_price_levels_tomorrow(self):
+        """Calculate price level classifications for all hours tomorrow.
+
+        Returns a list of dictionaries containing:
+        - time: timestamp of the hour
+        - price: the price for that hour
+        - percentage: percentage relative to tomorrow's average
+        - level: classification (very_cheap/cheap/normal/expensive/very_expensive)
+
+        Each hour is compared against tomorrow's average independently.
+        Returns empty list if data is not available.
+        """
         prices_tomorrow = self.get_prices_tomorrow()
         avg_price = self.get_avg_price_tomorrow()
 
@@ -414,17 +471,20 @@ class EntsoeCoordinator(DataUpdateCoordinator):
 
     # ANALYSIS: Helper function to determine level based on percentage
     def _calculate_level(self, percentage: float) -> str:
-        """Determine price level based on percentage of daily average."""
+        """Determine price level based on percentage of daily average.
+
+        Returns English state values that are translated via the translation files.
+        """
         if percentage <= 60:
-            return "zeer_goedkoop"
+            return "very_cheap"
         elif percentage <= 90:
-            return "goedkoop"
+            return "cheap"
         elif percentage < 115:
-            return "normaal"
+            return "normal"
         elif percentage < 140:
-            return "duur"
+            return "expensive"
         else:
-            return "zeer_duur"
+            return "very_expensive"
 
     # --------------------------------------------------------------------------------------------------------------------------------
     # SERVICES: returns data from the coordinator cache, or directly from ENTSO when not availble
