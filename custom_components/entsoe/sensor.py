@@ -133,6 +133,7 @@ def sensor_descriptions(
             key="price_level",
             name="Current price level",
             icon="mdi:chart-bell-curve",
+            suggested_display_precision=None,
             value_fn=lambda coordinator: coordinator.get_price_level(),
         ),
     )
@@ -191,11 +192,12 @@ class EntsoeSensor(CoordinatorEntity, RestoreSensor):
 
         self.entity_description: EntsoeEntityDescription = description
         self._attr_icon = description.icon
-        self._attr_suggested_display_precision = (
-            description.suggested_display_precision
-            if description.suggested_display_precision is not None
-            else 2
-        )
+        # Only set suggested_display_precision if it's defined in the description
+        # For string sensors like price_level, it should remain None
+        if hasattr(description, 'suggested_display_precision'):
+            self._attr_suggested_display_precision = description.suggested_display_precision
+        else:
+            self._attr_suggested_display_precision = 2
 
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
