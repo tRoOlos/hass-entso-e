@@ -129,6 +129,12 @@ def sensor_descriptions(
             icon="mdi:clock",
             value_fn=lambda coordinator: coordinator.get_min_time(),
         ),
+        EntsoeEntityDescription(
+            key="price_level",
+            name="Current price level",
+            icon="mdi:chart-bell-curve",
+            value_fn=lambda coordinator: coordinator.get_price_level(),
+        ),
     )
 
 
@@ -271,6 +277,27 @@ class EntsoeSensor(CoordinatorEntity, RestoreSensor):
         except Exception as exc:
             _LOGGER.warning(
                 f"Unable to update attributes of the average entity, error: {exc}, data: {self.coordinator.data}"
+            )
+
+        try:
+            if (
+                self.description.key == "price_level"
+                and self._attr_native_value is not None
+                and self.coordinator.data is not None
+            ):
+                current_price = self.coordinator.get_current_price()
+                avg_price = self.coordinator.get_avg_price()
+                self._attr_extra_state_attributes = {
+                    "current_percentage": round((current_price / avg_price) * 100, 1) if avg_price and avg_price > 0 else None,
+                    "price_levels_today": self.coordinator.get_price_levels_today(),
+                    "price_levels_tomorrow": self.coordinator.get_price_levels_tomorrow(),
+                }
+                _LOGGER.debug(
+                    f"price level attributes updated: {self._attr_extra_state_attributes}"
+                )
+        except Exception as exc:
+            _LOGGER.warning(
+                f"Unable to update attributes of the price level entity, error: {exc}, data: {self.coordinator.data}"
             )
 
     @property

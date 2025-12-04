@@ -343,6 +343,75 @@ class EntsoeCoordinator(DataUpdateCoordinator):
         current = self.get_current_price() - min
         return round(current / spread * 100, 1)
 
+    # ANALYSIS: Get current price level based on percentage of daily average
+    def get_price_level(self):
+        current_price = self.get_current_price()
+        avg_price = self.get_avg_price()
+
+        if avg_price is None or avg_price <= 0 or current_price is None:
+            return None
+
+        percentage = (current_price / avg_price) * 100
+        return self._calculate_level(percentage)
+
+    # ANALYSIS: Calculate price levels for all prices today
+    def get_price_levels_today(self):
+        prices_today = self.get_prices_today()
+        avg_price = self.get_avg_price()
+
+        if not prices_today or avg_price is None or avg_price <= 0:
+            return []
+
+        levels = []
+        for price_data in prices_today:
+            price = price_data["price"]
+            percentage = (price / avg_price) * 100
+
+            levels.append({
+                "time": price_data["time"],
+                "price": price,
+                "percentage": round(percentage, 1),
+                "level": self._calculate_level(percentage),
+            })
+
+        return levels
+
+    # ANALYSIS: Calculate price levels for all prices tomorrow
+    def get_price_levels_tomorrow(self):
+        prices_tomorrow = self.get_prices_tomorrow()
+        avg_price = self.get_avg_price()
+
+        if not prices_tomorrow or avg_price is None or avg_price <= 0:
+            return []
+
+        levels = []
+        for price_data in prices_tomorrow:
+            price = price_data["price"]
+            percentage = (price / avg_price) * 100
+
+            levels.append({
+                "time": price_data["time"],
+                "price": price,
+                "percentage": round(percentage, 1),
+                "level": self._calculate_level(percentage),
+            })
+
+        return levels
+
+    # ANALYSIS: Helper function to determine level based on percentage
+    def _calculate_level(self, percentage: float) -> str:
+        """Determine price level based on percentage of daily average."""
+        if percentage <= 60:
+            return "zeer_goedkoop"
+        elif percentage <= 90:
+            return "goedkoop"
+        elif percentage < 115:
+            return "normaal"
+        elif percentage < 140:
+            return "duur"
+        else:
+            return "zeer_duur"
+
     # --------------------------------------------------------------------------------------------------------------------------------
     # SERVICES: returns data from the coordinator cache, or directly from ENTSO when not availble
     async def get_energy_prices(self, start_date, end_date):

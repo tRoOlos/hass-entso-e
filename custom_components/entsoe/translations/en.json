@@ -68,5 +68,19 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "price_level": {
+        "name": "Current price level",
+        "state": {
+          "zeer_goedkoop": "Very Cheap",
+          "goedkoop": "Cheap",
+          "normaal": "Normal",
+          "duur": "Expensive",
+          "zeer_duur": "Very Expensive"
+        }
+      }
+    }
   }
 }
